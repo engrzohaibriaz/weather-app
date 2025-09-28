@@ -1,16 +1,21 @@
 #!/bin/sh
 set -e
 
-# API_URL environment variable or default
-API_URL=${API_URL:-http://todoapi:8080/api/todo}
+# Internal API URL (default for Docker Compose use)
+API_URL_INTERNAL=${API_URL_INTERNAL:-http://todoapi:8080/api/}
 
-# Create config directory
+# Create config directory for Angular
 mkdir -p /usr/share/nginx/html/assets/config
 
-# Write dynamic runtime config
-echo "{
-  \"apiUrl\": \"/api/todo\"
-}" > /usr/share/nginx/html/assets/config/config.json
+# Always point frontend to relative URL
+cat <<EOF > /usr/share/nginx/html/assets/config/config.json
+{
+  "apiUrl": "/api/todo"
+}
+EOF
+
+# Replace placeholder in nginx.conf with environment variable
+sed -i "s|__API_URL_INTERNAL__|$API_URL_INTERNAL|g" /etc/nginx/conf.d/default.conf
 
 # Start Nginx in foreground
 exec nginx -g 'daemon off;'
