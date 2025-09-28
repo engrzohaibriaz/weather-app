@@ -1,6 +1,10 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { AppComponent } from './app/app';
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+fetch('/assets/config/config.json')
+  .then(response => response.json())
+  .then(config => {
+    (window as any).__env = config;
+    return bootstrapApplication(AppComponent); // ✅ remove appConfig
+  })
+  .catch(err => console.error('Failed to load config:', err));
